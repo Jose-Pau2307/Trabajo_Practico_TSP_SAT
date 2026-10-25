@@ -1,8 +1,5 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- */
-
 package com.mycompany.practica_tsp.sat;
+
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
@@ -21,7 +18,12 @@ import org.sat4j.specs.ContradictionException;
 import org.sat4j.specs.TimeoutException;
 
 /**
+ * Resuelve una instancia del problema TSP mediante una reducción a SAT.
  *
+ * Cada ciudad debe visitarse exactamente una vez y el recorrido debe
+ * regresar a la ciudad inicial. El costo total debe ser menor o igual
+ * que el límite K indicado en la instancia.
+ * 
  * @author Usuario
  */
 public class Practica_TSPSAT {
@@ -79,7 +81,7 @@ public class Practica_TSPSAT {
             for (int i=0;i<xs.length;i++)
                 for (int j=i+1;j<xs.length;j++) add(-xs[i],-xs[j]);
         }
-        void writeDimacs(Path p) throws IOException {
+        void writeDimacs(Path p) throws IOException {   //guarda las cláusulas en formato DIMACS
             try (BufferedWriter w = Files.newBufferedWriter(p)) {
                 w.write("p cnf " + vars + " " + clauses.size()); w.newLine();
                 for (int[] c : clauses) {
@@ -95,7 +97,7 @@ public class Practica_TSPSAT {
     static int[][] x;
     static Cnf cnf;
 
-    static int[] addConstantTimesLiteral(int[] sum, int literal, int weight) {
+    static int[] addConstantTimesLiteral(int[] sum, int literal, int weight) {  //suma un peso condicionado por una variable booleana
         int[] result = new int[sum.length];
         int carry = cnf.falseVar;
         for (int b=0;b<sum.length;b++) {
@@ -108,7 +110,7 @@ public class Practica_TSPSAT {
         return result;
     }
 
-    static int lessOrEqual(int[] a, int limit) {
+    static int lessOrEqual(int[] a, int limit) {  //codifica la comparación del costo con el límite \(K\)
         int equal = cnf.trueVar;
         int less = cnf.falseVar;
         for (int b=a.length-1;b>=0;b--) {
@@ -124,7 +126,7 @@ public class Practica_TSPSAT {
         return cnf.or(less, equal);
     }
 
-    static void encode() {
+    static void encode() {    //construye las variables y restricciones CNF.
         cnf = new Cnf();
         x = new int[n][n];
         for (int i=0;i<n;i++) for (int t=0;t<n;t++) x[i][t]=cnf.newVar();
@@ -187,6 +189,7 @@ public class Practica_TSPSAT {
         }
     }
 
+    //lee y valida la instancia
     static int[][] readInstance(Path file) throws IOException {
         List<String> tokens = new ArrayList<>();
         for (String line : Files.readAllLines(file)) {
